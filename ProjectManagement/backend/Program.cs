@@ -1,5 +1,4 @@
-
-namespace ProjectManagement
+namespace ProjectManagement.backend
 {
     public class Program
     {
