@@ -1,3 +1,9 @@
+using ProjectManagement.backend.Models;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
 namespace ProjectManagement.backend
 {
     public class Program
@@ -7,15 +13,41 @@ namespace ProjectManagement.backend
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            var services = builder.Services;
+            var configuration = builder.Configuration;
 
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                Console.WriteLine("Connection string is null or empty!");
+            }
+            else
+            {
+                Console.WriteLine($"Connection String: {connectionString}");
+            }
+
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(connectionString));
+
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = true;
+            })
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.AddAuthentication().AddGoogle(googleOptions =>
+            {
+                googleOptions.ClientId = configuration["Authentication:Google:ClientId"];
+                googleOptions.ClientSecret = configuration["Authentication:Google:ClientSecret"];
+            });
+
+            services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -23,9 +55,8 @@ namespace ProjectManagement.backend
             }
 
             app.UseHttpsRedirection();
-
+            app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 
