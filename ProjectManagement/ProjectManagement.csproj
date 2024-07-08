@@ -18,8 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="backend\Controllers\" />
-    <Folder Include="backend\Services\" />
     <Folder Include="frontend\public\" />
     <Folder Include="frontend\src\componenents\" />
     <Folder Include="frontend\src\pages\" />
