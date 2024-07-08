@@ -1,4 +1,5 @@
 using ProjectManagement.backend.Models;
+using ProjectManagement.backend.Services; 
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,7 @@ namespace ProjectManagement.backend
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args) 
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +60,14 @@ namespace ProjectManagement.backend
             app.UseAuthorization();
 
             app.MapControllers();
+
+            // Dodaj ten kod aby uruchomiæ SeedData
+            using (var scope = app.Services.CreateScope())
+            {
+                var scopeServices = scope.ServiceProvider;
+                var userManager = scopeServices.GetRequiredService<UserManager<ApplicationUser>>();
+                await SeedData.Initialize(scopeServices, userManager);
+            }
 
             app.Run();
         }
